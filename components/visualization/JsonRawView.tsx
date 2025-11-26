@@ -13,12 +13,11 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react'
-import { JsonStats } from '@/types'
 import { JsonAnalyzer } from '@/lib/json-analyzer'
 import { toast } from 'react-hot-toast'
 
 interface JsonRawViewProps {
-  data: any
+  data: unknown
   className?: string
   maxHeight?: string
 }

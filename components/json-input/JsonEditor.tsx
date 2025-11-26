@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
-import Editor from '@monaco-editor/react'
+import { useRef, useState } from 'react'
+import Editor, { type OnMount } from '@monaco-editor/react'
+import type { editor } from 'monaco-editor'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -18,7 +19,7 @@ export default function JsonEditor({ initialValue = '', onJsonLoad, className }:
   const [value, setValue] = useState(initialValue)
   const [isValid, setIsValid] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const editorRef = useRef<any>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   const validateJson = (jsonString: string) => {
     if (!jsonString.trim()) {
@@ -114,7 +115,7 @@ export default function JsonEditor({ initialValue = '', onJsonLoad, className }:
     validateJson(sample)
   }
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor
     
     editor.getModel()?.updateOptions({

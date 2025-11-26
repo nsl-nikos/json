@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { 
   TreePine, 
@@ -13,7 +12,7 @@ import {
   Clock,
   Zap
 } from 'lucide-react'
-import { JsonDocument, JsonStats, VisualizationMode } from '@/types'
+import { JsonDocument, JsonStats } from '@/types'
 import { JsonAnalyzer } from '@/lib/json-analyzer'
 import JsonTreeView from './JsonTreeView'
 import JsonTableView from './JsonTableView'
@@ -37,17 +36,6 @@ export default function JsonVisualizer({
   useEffect(() => {
     setActiveView(viewMode)
   }, [viewMode])
-  
-  const [visualizationMode] = useState<VisualizationMode>({
-    type: 'tree',
-    settings: {
-      showTypes: true,
-      showPath: true,
-      maxDepth: 10,
-      collapseLargeArrays: true,
-      arrayThreshold: 50
-    }
-  })
 
   const stats = useMemo(() => {
     if (!document.content || !document.isValid) return null
@@ -223,7 +211,7 @@ export default function JsonVisualizer({
 
       {/* Visualization Tabs */}
       <Card className="p-4">
-        <Tabs value={activeView} onValueChange={setActiveView}>
+        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'tree' | 'table' | 'raw')}>
           {!hideControls && (
             <TabsList className="grid grid-cols-3 w-full mb-4">
               <TabsTrigger value="tree" className="flex items-center space-x-2">

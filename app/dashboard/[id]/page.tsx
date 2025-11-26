@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,8 +13,6 @@ import {
   Play,
   Plus,
   TreePine,
-  Table2,
-  FileText,
   BarChart3,
   Save,
   FolderOpen,
@@ -28,9 +26,16 @@ import { JsonVisualizer, JsonCanvasView } from '@/components/visualization'
 import { CollaborationPanel, UserCursors } from '@/components/collaboration'
 import { JsonDocument, JsonInputMethod, Workspace, WorkspaceDocument } from '@/types'
 import { useRealtime } from '@/hooks/use-realtime'
-import { useCollaborationStore } from '@/stores/collaboration-store'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
+
+interface WindowWithCanvasControls extends Window {
+  canvasControls?: {
+    resetZoom: () => void
+    fitToScreen: () => void
+    reheat: () => void
+  }
+}
 
 export default function WorkspaceDashboard() {
   const params = useParams()
@@ -42,30 +47,16 @@ export default function WorkspaceDashboard() {
   const [currentDocument, setCurrentDocument] = useState<JsonDocument | null>(null)
   const [documentMethod, setDocumentMethod] = useState<JsonInputMethod | null>(null)
   const [roomId, setRoomId] = useState<string | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email?: string; user_metadata?: { name?: string } } | null>(null)
   const [activeViewMode, setActiveViewMode] = useState<'tree' | 'table' | 'raw' | 'canvas'>('canvas')
-  const [selectedCanvasNode, setSelectedCanvasNode] = useState<any>(null)
+  const [selectedCanvasNode, setSelectedCanvasNode] = useState<{ color?: string; label?: string; type?: string; path?: string[]; depth?: number; value?: unknown; children?: unknown[] } | null>(null)
   const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(true)
   const [isLoadingDocument, setIsLoadingDocument] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(false)
 
   const supabase = createClient()
   
-  useEffect(() => {
-    const initialize = async () => {
-      setIsLoadingWorkspace(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      
-      if (user && workspaceId) {
-        await Promise.all([loadWorkspace(), loadDocuments()])
-      }
-      setIsLoadingWorkspace(false)
-    }
-    initialize()
-  }, [workspaceId])
-
-  const loadWorkspace = async () => {
+  const loadWorkspace = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('workspaces')
@@ -92,9 +83,9 @@ export default function WorkspaceDashboard() {
       toast.error('Workspace not found')
       router.push('/dashboard')
     }
-  }
+  }, [workspaceId, supabase, router])
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('documents')
@@ -123,9 +114,24 @@ export default function WorkspaceDashboard() {
       console.error('Error loading documents:', error)
       toast.error('Failed to load documents')
     }
-  }
+  }, [workspaceId, supabase])
 
-  const realtime = useRealtime({
+  useEffect(() => {
+    const initialize = async () => {
+      setIsLoadingWorkspace(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      
+      if (user && workspaceId) {
+        await Promise.all([loadWorkspace(), loadDocuments()])
+      }
+      setIsLoadingWorkspace(false)
+    }
+    initialize()
+  }, [workspaceId, loadWorkspace, loadDocuments, supabase.auth])
+
+  // Initialize realtime collaboration (has side effects)
+  useRealtime({
     roomId: roomId || '',
     userId: user?.id || '',
     userName: user?.user_metadata?.name || user?.email || 'Anonymous'
@@ -231,7 +237,7 @@ export default function WorkspaceDashboard() {
       }
 
       const method: JsonInputMethod = {
-        type: doc.inputMethod as any || 'file'
+        type: (doc.inputMethod as JsonInputMethod['type']) || 'file'
       }
 
       setCurrentDocument(jsonDocument)
@@ -489,7 +495,7 @@ export default function WorkspaceDashboard() {
                                   size: file.size,
                                   isValid: true
                                 }, { type: 'file', source: file.name })
-                              } catch (error) {
+                              } catch {
                                 toast.error('Invalid JSON file')
                               } finally {
                                 setIsLoadingData(false)
@@ -529,7 +535,7 @@ export default function WorkspaceDashboard() {
                               size: JSON.stringify(content).length,
                               isValid: true
                             }, { type: 'url', source: url })
-                          } catch (error) {
+                          } catch {
                             toast.error('Failed to fetch JSON')
                           } finally {
                             setIsLoadingData(false)
@@ -565,7 +571,7 @@ export default function WorkspaceDashboard() {
                               size: jsonText.length,
                               isValid: true
                             }, { type: 'manual' })
-                          } catch (error) {
+                          } catch {
                             toast.error('Invalid JSON format')
                           } finally {
                             setIsLoadingData(false)
@@ -639,8 +645,9 @@ export default function WorkspaceDashboard() {
                             size="sm" 
                             className="h-8 px-3 text-xs transition-all hover:scale-105"
                             onClick={() => {
-                              if ((window as any).canvasControls) {
-                                (window as any).canvasControls.resetZoom()
+                              const win = window as WindowWithCanvasControls
+                              if (win.canvasControls) {
+                                win.canvasControls.resetZoom()
                               }
                             }}
                           >
@@ -652,8 +659,9 @@ export default function WorkspaceDashboard() {
                             size="sm" 
                             className="h-8 px-3 text-xs transition-all hover:scale-105"
                             onClick={() => {
-                              if ((window as any).canvasControls) {
-                                (window as any).canvasControls.fitToScreen()
+                              const win = window as WindowWithCanvasControls
+                              if (win.canvasControls) {
+                                win.canvasControls.fitToScreen()
                               }
                             }}
                           >
@@ -665,8 +673,9 @@ export default function WorkspaceDashboard() {
                             size="sm" 
                             className="h-8 px-3 text-xs transition-all hover:scale-105"
                             onClick={() => {
-                              if ((window as any).canvasControls) {
-                                (window as any).canvasControls.reheat()
+                              const win = window as WindowWithCanvasControls
+                              if (win.canvasControls) {
+                                win.canvasControls.reheat()
                               }
                             }}
                           >
@@ -744,8 +753,12 @@ export default function WorkspaceDashboard() {
                         </div>
                         
                         <div className="text-xs text-muted-foreground space-y-1">
-                          <div>Path: <code className="bg-background px-1 rounded">{selectedCanvasNode.path.join('.')}</code></div>
-                          <div>Depth: {selectedCanvasNode.depth}</div>
+                          {selectedCanvasNode.path && (
+                            <div>Path: <code className="bg-background px-1 rounded">{selectedCanvasNode.path.join('.')}</code></div>
+                          )}
+                          {selectedCanvasNode.depth !== undefined && (
+                            <div>Depth: {selectedCanvasNode.depth}</div>
+                          )}
                         </div>
                       </div>
 

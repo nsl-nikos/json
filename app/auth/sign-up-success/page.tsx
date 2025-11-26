@@ -33,7 +33,7 @@ export default function SignUpSuccessPage() {
             <div className="space-y-2">
               <h1 className="text-3xl font-bold">Check your email</h1>
               <p className="text-white/60">
-                We've sent you a confirmation link. Please check your email to verify your account before signing in.
+                We&apos;ve sent you a confirmation link. Please check your email to verify your account before signing in.
               </p>
             </div>
           </div>

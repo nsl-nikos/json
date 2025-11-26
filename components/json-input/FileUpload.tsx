@@ -13,7 +13,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({ onFileLoad, className }: FileUploadProps) {
-  const parseJsonSafely = (text: string): { content: any; isValid: boolean; error?: string } => {
+  const parseJsonSafely = (text: string): { content: unknown; isValid: boolean; error?: string } => {
     try {
       const cleanText = text.replace(/^\uFEFF/, '')
       const trimmedText = cleanText.trim()
@@ -66,7 +66,8 @@ export default function FileUpload({ onFileLoad, className }: FileUploadProps) {
           }
         }
         
-      } catch (secondError) {
+      } catch {
+        // Ignore second error
       }
       
       return { 

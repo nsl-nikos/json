@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import Link from 'next/link'
 import { 
   FileJson, 
   Upload, 
@@ -16,7 +17,6 @@ import {
   Sparkles,
   Github,
   ChevronRight,
-  Braces,
   Table2,
   Search
 } from 'lucide-react'
@@ -25,7 +25,7 @@ export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY })
     }
     
@@ -118,6 +118,7 @@ export default function Home() {
                 >
                   Sign In
                 </Button>
+                <Link href={'dashboard'}>
                 <Button 
                   onClick={handleGetStarted}
                   className="bg-white text-black hover:bg-white/90 font-medium transition-all hover:scale-105"
@@ -125,6 +126,7 @@ export default function Home() {
                   Get Started
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -156,6 +158,7 @@ export default function Home() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Link href={'dashboard'}>
               <Button 
                 size="lg" 
                 onClick={handleGetStarted}
@@ -164,6 +167,7 @@ export default function Home() {
                 Get Started
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
+              </Link>
               
               <Button 
                 variant="outline" 
@@ -197,7 +201,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2 pl-8">
                   <span className="text-white/40">→</span>
-                  <span>name: "John"</span>
+                  <span>name: &quot;John&quot;</span>
                 </div>
                 <div className="flex items-center gap-2 pl-8">
                   <span className="text-white/40">→</span>
@@ -338,6 +342,7 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <Link href={'dashboard'}>
                 <Button 
                   size="lg" 
                   onClick={handleGetStarted}
@@ -346,6 +351,7 @@ export default function Home() {
                   Get Started Free
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </Button>
+                </Link>
                 
                 <Button 
                   variant="outline" 
@@ -353,7 +359,9 @@ export default function Home() {
                   className="border-white/20 bg-white/5 hover:bg-white/10 text-white px-8 h-12 text-base hover:scale-105 transition-all"
                 >
                   <Github className="w-5 h-5 mr-2" />
+                  <a href="https://github.com/nsl-nikos/json">
                   View on GitHub
+                  </a>
                 </Button>
               </div>
 
@@ -381,7 +389,7 @@ export default function Home() {
             </div>
             
             <div className="text-sm text-white/40">
-              A personal project • Built with Next.js & Supabase
+              Made with <span className='text-white'>🤍</span> by <a href="https://github.com/nsl-nikos" target='_blank'className='text-white/80 hover:text-white duration-300'>nsl-nikos</a>
             </div>
           </div>
         </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useParticipants, useCurrentUserId } from '@/stores/collaboration-store'
 import { CollaborationCursor } from '@/types'

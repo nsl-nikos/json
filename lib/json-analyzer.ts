@@ -82,7 +82,7 @@ export class JsonAnalyzer {
       stats.objectCount++
       stats.totalKeys += Object.keys(value).length
       
-      Object.entries(value).forEach(([_, childValue]) => {
+      Object.values(value).forEach((childValue) => {
         this.analyzeValue(childValue, depth + 1, stats)
       })
     }

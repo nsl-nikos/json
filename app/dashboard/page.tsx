@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,10 +10,8 @@ import {
   Plus, 
   FolderOpen, 
   Users, 
-  Settings,
   Clock,
   MoreHorizontal,
-  Search,
   ArrowRight
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -22,25 +20,12 @@ import { Workspace } from '@/types'
 
 export default function Dashboard() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      if (user) {
-        loadWorkspaces(user.id)
-      } else {
-        setLoading(false)
-      }
-    }
-    getUser()
-  }, [])
-
-  const loadWorkspaces = async (userId: string) => {
+  const loadWorkspaces = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('workspaces')
@@ -66,7 +51,20 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      if (user) {
+        loadWorkspaces(user.id)
+      } else {
+        setLoading(false)
+      }
+    }
+    getUser()
+  }, [loadWorkspaces, supabase.auth])
 
   const createWorkspace = async () => {
     if (!user) return

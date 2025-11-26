@@ -44,7 +44,6 @@ export default function CollaborationPanel({ roomId, className }: CollaborationP
   const currentUserId = useCurrentUserId()
 
   const participantsList = Object.values(participants)
-  const otherUsers = participantsList.filter(p => p.userId !== currentUserId)
   const recentEvents = events.slice(-10).reverse()
 
   const getInitials = (name: string): string => {
@@ -72,7 +71,7 @@ export default function CollaborationPanel({ roomId, className }: CollaborationP
           text: 'Join me in this JSON visualization session',
           url: `${window.location.origin}/room/${roomId}`
         })
-      } catch (error) {
+      } catch {
         copyRoomLink() // Fallback to copy
       }
     } else {

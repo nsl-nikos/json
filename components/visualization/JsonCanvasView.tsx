@@ -104,8 +104,6 @@ export default function JsonCanvasView({ data, onNodeSelect, className }: Simple
   }, [])
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout
-
     const initialize = () => {
       try {
         console.log('Starting canvas initialization...')
@@ -298,7 +296,7 @@ export default function JsonCanvasView({ data, onNodeSelect, className }: Simple
       }
     }
 
-    timeoutId = setTimeout(initialize, 100)
+    const timeoutId = setTimeout(initialize, 100)
 
     return () => {
       clearTimeout(timeoutId)

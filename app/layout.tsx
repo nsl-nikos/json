@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-
+import { LoadingProvider } from "./loadingProvider";
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "JSON Visualizer - Explore JSON Data Structures",
+  title: "JSON Visualizer",
   description: "A modern, open-source tool for visualizing, editing, and collaborating on JSON data. Features real-time collaboration, multiple view modes, and powerful search capabilities.",
   keywords: ["JSON", "visualizer", "JSON viewer", "JSON editor", "data visualization", "developer tools"],
   authors: [{ name: "Your Name" }],
@@ -64,7 +64,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+        <LoadingProvider>
+
           {children}
+        </LoadingProvider>
+
         </ThemeProvider>
       </body>
     </html>

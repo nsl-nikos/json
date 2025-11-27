@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
@@ -23,6 +23,8 @@ import {
 
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({})
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -31,8 +33,25 @@ export default function Home() {
     
     window.addEventListener('mousemove', handleMouseMove)
     
+    // Setup Intersection Observer for scroll animations
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }))
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -100px 0px' }
+    )
+
+    // Observe all elements with data-animate attribute
+    const elements = document.querySelectorAll('[data-animate]')
+    elements.forEach((el) => observerRef.current?.observe(el))
+    
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
+      observerRef.current?.disconnect()
     }
   }, [])
 
@@ -79,6 +98,107 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes slideInHeader {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -20px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-fade-in-down {
+          animation: fadeInDown 0.6s ease-out forwards;
+        }
+
+        .animate-fade-in-left {
+          animation: fadeInLeft 0.6s ease-out forwards;
+        }
+
+        .animate-fade-in-right {
+          animation: fadeInRight 0.6s ease-out forwards;
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.6s ease-out forwards;
+        }
+
+        .animate-slide-in-header {
+          animation: slideInHeader 0.6s ease-out forwards;
+        }
+
+        /* Only animate scroll-triggered elements */
+        [data-animate]:not(.hero-element) {
+          opacity: 0;
+        }
+
+        [data-animate].visible {
+          animation-fill-mode: forwards;
+        }
+      `}</style>
+
       {/* Animated gradient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -94,8 +214,8 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Header */}
-      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full px-6">
+      {/* Header - slides down on load */}
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full px-6 animate-slide-in-header">
         <div className="max-w-6xl mx-auto">
           <div className="border border-white/10 bg-black/40 backdrop-blur-xl rounded-2xl px-6 py-4 transition-all duration-300 hover:border-white/20 hover:bg-black/50">
             <div className="flex items-center justify-between">
@@ -107,7 +227,6 @@ export default function Home() {
                   </div>
                 </div>
                 <span className="text-lg font-semibold">JSON Visualizer</span>
- 
               </div>
               
               <div className="flex items-center gap-3">
@@ -119,13 +238,13 @@ export default function Home() {
                   Sign In
                 </Button>
                 <Link href={'dashboard'}>
-                <Button 
-                  onClick={handleGetStarted}
-                  className="bg-white text-black hover:bg-white/90 font-medium transition-all hover:scale-105"
-                >
-                  Get Started
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                  <Button 
+                    onClick={handleGetStarted}
+                    className="bg-white text-black hover:bg-white/90 font-medium transition-all hover:scale-105"
+                  >
+                    Get Started
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
                 </Link>
               </div>
             </div>
@@ -138,13 +257,19 @@ export default function Home() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-8">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+            <div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hero-element animate-scale-in"
+              style={{ animationDelay: '0.1s' }}
+            >
               <Sparkles className="w-4 h-4 text-white" />
               <span className="text-sm font-medium">Open Source Side Project</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
+            <h1 
+              className="text-6xl md:text-8xl font-bold tracking-tight hero-element animate-fade-in-up"
+              style={{ animationDelay: '0.2s' }}
+            >
               <span className="block mb-2">JSON made</span>
               <span className="block bg-gradient-to-r from-white via-white/90 to-white/70 text-transparent bg-clip-text">
                 simple
@@ -152,21 +277,27 @@ export default function Home() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl md:text-2xl text-white/60 max-w-2xl mx-auto leading-relaxed">
+            <p 
+              className="text-xl md:text-2xl text-white/60 max-w-2xl mx-auto leading-relaxed hero-element animate-fade-in-up"
+              style={{ animationDelay: '0.3s' }}
+            >
               A clean, powerful way to visualize and collaborate on JSON data structures
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div 
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 hero-element animate-fade-in-up"
+              style={{ animationDelay: '0.4s' }}
+            >
               <Link href={'dashboard'}>
-              <Button 
-                size="lg" 
-                onClick={handleGetStarted}
-                className="bg-white text-black hover:bg-white/90 border-0 px-8 h-12 text-base font-semibold"
-              >
-                Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+                <Button 
+                  size="lg" 
+                  onClick={handleGetStarted}
+                  className="bg-white text-black hover:bg-white/90 border-0 px-8 h-12 text-base font-semibold"
+                >
+                  Get Started
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
               </Link>
               
               <Button 
@@ -180,10 +311,15 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Feature Showcase Cards */}
+          {/* Feature Showcase Cards - stagger animation from left, center, right */}
           <div className="mt-24 grid md:grid-cols-3 gap-4">
-            {/* Tree View */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm p-6 hover:bg-white/[0.07] transition-all">
+            {/* Tree View - from left */}
+            <Card 
+              id="card-tree"
+              data-animate
+              className={`bg-white/5 border-white/10 backdrop-blur-sm p-6 hover:bg-white/[0.07] transition-all ${isVisible['card-tree'] ? 'visible animate-fade-in-left' : ''}`}
+              style={{ animationDelay: '0.1s' }}
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg bg-white/10">
                   <TreePine className="w-5 h-5" />
@@ -210,8 +346,13 @@ export default function Home() {
               </div>
             </Card>
 
-            {/* Table View */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm p-6 hover:bg-white/[0.07] transition-all">
+            {/* Table View - from center/scale */}
+            <Card 
+              id="card-table"
+              data-animate
+              className={`bg-white/5 border-white/10 backdrop-blur-sm p-6 hover:bg-white/[0.07] transition-all ${isVisible['card-table'] ? 'visible animate-scale-in' : ''}`}
+              style={{ animationDelay: '0.2s' }}
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg bg-white/10">
                   <Table2 className="w-5 h-5" />
@@ -234,8 +375,13 @@ export default function Home() {
               </div>
             </Card>
 
-            {/* Search */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm p-6 hover:bg-white/[0.07] transition-all">
+            {/* Search - from right */}
+            <Card 
+              id="card-search"
+              data-animate
+              className={`bg-white/5 border-white/10 backdrop-blur-sm p-6 hover:bg-white/[0.07] transition-all ${isVisible['card-search'] ? 'visible animate-fade-in-right' : ''}`}
+              style={{ animationDelay: '0.3s' }}
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg bg-white/10">
                   <Search className="w-5 h-5" />
@@ -266,7 +412,12 @@ export default function Home() {
       {/* Features Grid */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          {/* Section header - fades in from bottom */}
+          <div 
+            id="features-header"
+            data-animate
+            className={`text-center mb-16 ${isVisible['features-header'] ? 'visible animate-fade-in-up' : ''}`}
+          >
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               What it offers
             </h2>
@@ -275,11 +426,15 @@ export default function Home() {
             </p>
           </div>
 
+          {/* Feature cards - stagger from bottom */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((feature, index) => (
               <Card 
                 key={index}
-                className="group relative bg-white/5 border-white/10 hover:bg-white/[0.07] transition-all duration-300 p-6 overflow-hidden"
+                id={`feature-${index}`}
+                data-animate
+                className={`group relative bg-white/5 border-white/10 hover:bg-white/[0.07] transition-all duration-300 p-6 overflow-hidden ${isVisible[`feature-${index}`] ? 'visible animate-fade-in-up' : ''}`}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative space-y-3">
@@ -295,10 +450,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tech Stack */}
+      {/* Tech Stack - scales in */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm overflow-hidden">
+          <div 
+            id="tech-stack"
+            data-animate
+            className={`rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm overflow-hidden ${isVisible['tech-stack'] ? 'visible animate-scale-in' : ''}`}
+          >
             <div className="text-center p-12 pb-8">
               <h2 className="text-3xl font-bold mb-3">Built with modern tools</h2>
               <p className="text-white/60">Powered by Next.js, React, and Supabase</p>
@@ -325,10 +484,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Final CTA - fades in from bottom */}
       <section className="py-32 px-6">
         <div className="container mx-auto max-w-4xl">
-          <div className="relative rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm p-16 overflow-hidden">
+          <div 
+            id="final-cta"
+            data-animate
+            className={`relative rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm p-16 overflow-hidden ${isVisible['final-cta'] ? 'visible animate-fade-in-up' : ''}`}
+          >
             {/* Subtle background effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent" />
             
@@ -343,14 +506,14 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Link href={'dashboard'}>
-                <Button 
-                  size="lg" 
-                  onClick={handleGetStarted}
-                  className="bg-white text-black hover:bg-white/90 border-0 px-8 h-12 text-base font-semibold hover:scale-105 transition-all"
-                >
-                  Get Started Free
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </Button>
+                  <Button 
+                    size="lg" 
+                    onClick={handleGetStarted}
+                    className="bg-white text-black hover:bg-white/90 border-0 px-8 h-12 text-base font-semibold hover:scale-105 transition-all"
+                  >
+                    Get Started Free
+                    <ChevronRight className="w-5 h-5 ml-2" />
+                  </Button>
                 </Link>
                 
                 <Button 
@@ -360,7 +523,7 @@ export default function Home() {
                 >
                   <Github className="w-5 h-5 mr-2" />
                   <a href="https://github.com/nsl-nikos/json">
-                  View on GitHub
+                    View on GitHub
                   </a>
                 </Button>
               </div>
@@ -377,8 +540,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-12 px-6">
+      {/* Footer - fades in from bottom */}
+      <footer 
+        id="footer"
+        data-animate
+        className={`border-t border-white/5 py-12 px-6 ${isVisible['footer'] ? 'visible animate-fade-in-up' : ''}`}
+      >
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
@@ -389,7 +556,7 @@ export default function Home() {
             </div>
             
             <div className="text-sm text-white/40">
-              Made with <span className='text-white'>🤍</span> by <a href="https://github.com/nsl-nikos" target='_blank'className='text-white/80 hover:text-white duration-300'>nsl-nikos</a>
+              Made with <span className='text-white'>🤍</span> by <a href="https://github.com/nsl-nikos" target='_blank' className='text-white/80 hover:text-white duration-300'>nsl-nikos</a>
             </div>
           </div>
         </div>

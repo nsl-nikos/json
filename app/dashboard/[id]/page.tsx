@@ -19,7 +19,11 @@ import {
   Trash2,
   Edit3,
   Upload,
-  Globe
+  Globe,
+  ArrowLeft,
+  Settings,
+  Share2
+
 } from 'lucide-react'
 import { JsonInput } from '@/components/json-input'
 import { JsonVisualizer, JsonCanvasView } from '@/components/visualization'
@@ -279,55 +283,51 @@ export default function WorkspaceDashboard() {
 
   return (
     <div className="h-screen bg-background flex flex-col">
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
-        <div className="px-6 py-3">
+ <header className="relative border-b border-white/10 bg-black/40 backdrop-blur-xl">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
+            {/* Left - Back button and workspace info */}
             <div className="flex items-center gap-4">
               <Button 
-                variant="ghost" 
-                size="sm" 
+                variant="ghost"
                 onClick={() => router.push('/dashboard')}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-white/70 hover:text-white hover:bg-white/10"
               >
-                <FolderOpen className="w-4 h-4 mr-2" />
-                Workspaces
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
               </Button>
               
-              <div className="h-4 w-px bg-border" />
+              <div className="h-6 w-px bg-white/10" />
               
-              <div className="flex items-center gap-2">
-                <FileJson className="w-5 h-5 text-primary" />
-                {isLoadingWorkspace ? (
-                  <LoadingSkeleton className="h-6 w-32" />
-                ) : (
-                  <h1 className="text-lg font-semibold transition-opacity duration-300">
-                    {workspace?.name}
-                  </h1>
-                )}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/20 blur-md rounded-lg" />
+                  <div className="relative bg-gradient-to-br from-white to-white/70 p-2 rounded-lg">
+                    <FileJson className="w-5 h-5 text-black" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold">{workspace?.name || 'Loading...'}</h1>
+                  <p className="text-xs text-white/40">{documents.length} documents</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {currentDocument && (
-                <Button onClick={saveDocument} size="sm" variant="outline">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-              )}
-              
-              {currentDocument && !roomId && user && (
-                <Button onClick={startCollaboration} size="sm" variant="outline">
-                  <Users className="w-4 h-4 mr-2" />
-                  Collaborate
-                </Button>
-              )}
-              
-              {currentDocument && (
-                <Button onClick={clearDocument} variant="ghost" size="sm">
-                  <Plus className="w-4 h-4 mr-2 rotate-45" />
-                  New
-                </Button>
-              )}
+            {/* Right - Actions */}
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost"
+                className="text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+              <Button 
+                variant="ghost"
+                className="text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
@@ -842,6 +842,31 @@ export default function WorkspaceDashboard() {
           </Card>
         </div>
       )}
+       
+      {/* <footer className="relative border-t border-white/5 mt-auto">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm text-white/40">
+              <span>Workspace created</span>
+              <span className="text-white/60">
+                {workspace?.createdAt && new Date(workspace.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+            
+            <div className="text-sm text-white/40">
+              Made with <span className="text-white">🤍</span> by{' '}
+              <a 
+                href="https://github.com/nsl-nikos" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/60 hover:text-white transition-colors"
+              >
+                nsl-nikos
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer> */}
     </div>
   )
 }

@@ -25,7 +25,7 @@ import { Workspace } from '@/types'
 export default function Dashboard() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [user, setUser] = useState<{ id: string, email?: string } | null>(null)
-  const [loading, setLoading] = useState(true)
+  // const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
@@ -52,9 +52,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error loading workspaces:', error)
       toast.error('Failed to load workspaces')
-    } finally {
-      setLoading(false)
-    }
+    } 
   }, [supabase])
 
   useEffect(() => {
@@ -64,7 +62,7 @@ export default function Dashboard() {
       if (user) {
         loadWorkspaces(user.id)
       } else {
-        setLoading(false)
+        // setLoading(false)
         router.push('/auth/login')
       }
     }

@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import { PageLoader } from '@/components/loader-component'
 
 const LoadingContext = createContext<{
@@ -11,17 +11,17 @@ const LoadingContext = createContext<{
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  // const router = useRouter()
 
   useEffect(() => {
     const handleStart = () => {
       setIsLoading(true)
     }
 
-    const handleStop = () => {
-      // Add a minimum delay so loader is visible
-      setTimeout(() => setIsLoading(false), 500)
-    }
+    // const handleStop = () => {
+    //   // Add a minimum delay so loader is visible
+    //   setTimeout(() => setIsLoading(false), 500)
+    // }
 
     // Listen for route changes
     window.addEventListener('beforeunload', handleStart)

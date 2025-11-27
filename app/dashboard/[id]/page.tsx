@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   FileJson, 
-  Users, 
+  // Users, 
   Zap,
   ArrowRight,
   Play,
   Plus,
   TreePine,
   BarChart3,
-  Save,
+  // Save,
   FolderOpen,
   Trash2,
   Edit3,
@@ -152,16 +152,16 @@ export default function WorkspaceDashboard() {
     }
   }
 
-  const startCollaboration = async () => {
-    if (!currentDocument || !user) {
-      toast.error('Please load a JSON document and sign in first')
-      return
-    }
+  // const startCollaboration = async () => {
+  //   if (!currentDocument || !user) {
+  //     toast.error('Please load a JSON document and sign in first')
+  //     return
+  //   }
 
-    const newRoomId = `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    setRoomId(newRoomId)
-    toast.success('Collaboration session started!')
-  }
+  //   const newRoomId = `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  //   setRoomId(newRoomId)
+  //   toast.success('Collaboration session started!')
+  // }
 
   const clearDocument = () => {
     setCurrentDocument(null)
@@ -169,59 +169,59 @@ export default function WorkspaceDashboard() {
     setRoomId(null)
   }
 
-  const saveDocument = async () => {
-    if (!currentDocument || !user || !workspace) {
-      toast.error('Cannot save: missing document, user, or workspace')
-      return
-    }
+  // const saveDocument = async () => {
+  //   if (!currentDocument || !user || !workspace) {
+  //     toast.error('Cannot save: missing document, user, or workspace')
+  //     return
+  //   }
 
-    try {
-      const documentData = {
-        title: currentDocument.title,
-        content: currentDocument.content,
-        workspace_id: workspaceId,
-        user_id: user.id,
-        file_size: currentDocument.size,
-        input_method: documentMethod?.type || 'manual',
-        is_public: false
-      }
+  //   try {
+  //     const documentData = {
+  //       title: currentDocument.title,
+  //       content: currentDocument.content,
+  //       workspace_id: workspaceId,
+  //       user_id: user.id,
+  //       file_size: currentDocument.size,
+  //       input_method: documentMethod?.type || 'manual',
+  //       is_public: false
+  //     }
 
-      if (currentDocument.workspaceId && currentDocument.id) {
-        const { error } = await supabase
-          .from('documents')
-          .update({
-            ...documentData,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', currentDocument.id)
+  //     if (currentDocument.workspaceId && currentDocument.id) {
+  //       const { error } = await supabase
+  //         .from('documents')
+  //         .update({
+  //           ...documentData,
+  //           updated_at: new Date().toISOString()
+  //         })
+  //         .eq('id', currentDocument.id)
 
-        if (error) throw error
-        toast.success('Document updated!')
-      } else {
-        const { data, error } = await supabase
-          .from('documents')
-          .insert(documentData)
-          .select()
-          .single()
+  //       if (error) throw error
+  //       toast.success('Document updated!')
+  //     } else {
+  //       const { data, error } = await supabase
+  //         .from('documents')
+  //         .insert(documentData)
+  //         .select()
+  //         .single()
 
-        if (error) throw error
+  //       if (error) throw error
         
-        setCurrentDocument(prev => prev ? {
-          ...prev,
-          id: data.id,
-          workspaceId: workspaceId,
-          isSaved: true
-        } : null)
+  //       setCurrentDocument(prev => prev ? {
+  //         ...prev,
+  //         id: data.id,
+  //         workspaceId: workspaceId,
+  //         isSaved: true
+  //       } : null)
         
-        toast.success('Document saved!')
-      }
+  //       toast.success('Document saved!')
+  //     }
 
-      loadDocuments() // Refresh document list
-    } catch (error) {
-      console.error('Error saving document:', error)
-      toast.error('Failed to save document')
-    }
-  }
+  //     loadDocuments() // Refresh document list
+  //   } catch (error) {
+  //     console.error('Error saving document:', error)
+  //     toast.error('Failed to save document')
+  //   }
+  // }
 
   const loadDocumentFromList = async (doc: WorkspaceDocument) => {
     try {
@@ -846,7 +846,7 @@ export default function WorkspaceDashboard() {
       {/* <footer className="relative border-t border-white/5 mt-auto">
         <div className="container mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-sm text-white/40">
+            <div className="flex items-center gap-2 bpoext-sm text-white/40">
               <span>Workspace created</span>
               <span className="text-white/60">
                 {workspace?.createdAt && new Date(workspace.createdAt).toLocaleDateString()}
